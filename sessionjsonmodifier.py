@@ -107,10 +107,6 @@ class sessionInfo:
             self.window_tabs_urls = dict()
             self.tabs_history = dict()
             self.tabs_history_urls = dict()
-            self.current_window = None
-            self.current_window_index = None
-            self.current_tab = None
-            self.current_tab_index = None
             for window in in_json["windows"]:
                 win_name = "Window " + str(win_cnt)
                 win_cnt += 1
@@ -175,10 +171,10 @@ layout = [[sg.Text('Session to add from')],
 window = sg.Window('Window Title', layout)
 
 
-# current_window = None
-# current_window_index = None
-# current_tab = None
-# current_tab_index = None
+current_window = None
+current_window_index = None
+current_tab = None
+current_tab_index = None
 use_urls = False
 
 
@@ -210,19 +206,19 @@ while True:                 # Event Loop
         else:
             window.Element('_TAB').Update(values=get_listbox_values(first_session.window_tabs, values['_WIN']), set_to_index=0)
         if len(values['_WIN']) > 0:
-            first_session.current_window = values['_WIN'][0]
-            first_session.current_window_index = first_session.window_listbox.index(first_session.current_window)
+            current_window = values['_WIN'][0]
+            current_window_index = first_session.window_listbox.index(current_window)
     elif event == '_TAB':
         if (use_urls):
             window.Element('_HIS').Update(values=get_listbox_values(first_session.tabs_history_urls, values['_TAB']))
         else:
             window.Element('_HIS').Update(values=get_listbox_values(first_session.tabs_history, values['_TAB']))
         if len(values['_TAB']) > 0:
-            first_session.current_tab = values['_TAB'][0]
+            current_tab = values['_TAB'][0]
             if use_urls:
-                first_session.current_tab_index = first_session.window_tabs_urls[first_session.current_window].index(first_session.current_tab)
+                current_tab_index = first_session.window_tabs_urls[current_window].index(current_tab)
             else:
-                first_session.current_tab_index = first_session.window_tabs[first_session.current_window].index(first_session.current_tab)
+                current_tab_index = first_session.window_tabs[current_window].index(current_tab)
     elif event == 'Choose':
         if values['Session1'] != '':
             decompressed = decompress(values['Session1'])
@@ -243,8 +239,8 @@ while True:                 # Event Loop
         window.Element('_WIN').Update(values=first_session.window_listbox, set_to_index=0)
     elif event == 'Delete Tab(s)':
         try:
-            print(len(first_session.window_tabs_urls[first_session.current_window]))
-            window_index = first_session.window_listbox.index(first_session.current_window)
+            print(len(first_session.window_tabs_urls[current_window]))
+            window_index = first_session.window_listbox.index(current_window)
             indices_to_delete = []
             for tab_name in values['_TAB']:
                 indices_to_delete += [get_index(tab_name)]
@@ -253,7 +249,7 @@ while True:                 # Event Loop
             for index_to_delete in indices_to_delete:
                 first_session.held_json["windows"][window_index]["tabs"].pop(index_to_delete-1)
             first_session = sessionInfo(first_session.held_json)
-            print(len(first_session.window_tabs_urls[first_session.current_window]))
+            print(len(first_session.window_tabs_urls[current_window]))
             if use_urls:
                 window.Element('_TAB').Update(values=first_session.window_tabs_urls[values['_WIN'][0]], set_to_index=indices_to_delete[0])
             else:
@@ -287,13 +283,13 @@ while True:                 # Event Loop
         first_session = sessionInfo(first_session.held_json)
         window.Element('_WIN').Update(values=first_session.window_listbox, set_to_index=0)
     elif event == 'Add Tab(s)':
-        indices_to_add = []
-        for to_add in values['_TAB2']:
-            indices_to_add += [second_session.window_tabs[second_session.current_window].index(to_add)]
-        for index_to_add in indices_to_add:
-            first_session.held_json["windows"][first_session.current_window_index]["tabs"] += [second_session.held_json["windows"][second_session.current_window_index][index_to_add]] 
-        first_session = sessionInfo(first_session.held_json)
-        window.Element('_WIN').Update(values=first_session.window_listbox, set_to_index=0)
+         indices_to_add = []
+        # for to_add in values['_TAB2']:
+        #     indices_to_add += [second_session.tabs_history.index(to_add)]
+        # for index_to_add in indices_to_add:
+        #     first_session.held_json[current_window_index] += [second_session.held_json["windows"][index_to_add]]
+        # first_session = sessionInfo(first_session.held_json)
+        # window.Element('_WIN').Update(values=first_session.window_listbox, set_to_index=0)
     elif event == 'Add History':
         print(5)
 
@@ -301,8 +297,8 @@ while True:                 # Event Loop
 
     # make option to view titles instead
     elif event == 'Search':
-        (matched_urls, matched_titles) = get_search(values['In Search'], first_session.current_window, 
-                        first_session.window_tabs_urls[first_session.current_window], first_session.window_tabs[first_session.current_window])
+        (matched_urls, matched_titles) = get_search(values['In Search'], current_window, 
+                        first_session.window_tabs_urls[current_window], first_session.window_tabs[current_window])
         if (use_urls):
             window.Element('_SEARCH').Update(values=matched_urls)
         else:
@@ -312,20 +308,20 @@ while True:                 # Event Loop
         if len(values['_SEARCH']) > 0:
             first_item = values['_SEARCH'][0]
             if use_urls:
-                important_index = first_session.window_tabs_urls[first_session.current_window].index(first_item)
+                important_index = first_session.window_tabs_urls[current_window].index(first_item)
             else:
-                important_index = first_session.window_tabs[first_session.current_window].index(first_item)
+                important_index = first_session.window_tabs[current_window].index(first_item)
             window.Element('_TAB').Update(set_to_index=important_index)
 
     elif event == 'Delete selected searched':
         try:
             indices_to_delete = []
-            print(len(first_session.window_tabs[first_session.current_window]))
+            print(len(first_session.window_tabs[current_window]))
             for tab_name in values['_SEARCH']:
                 indices_to_delete += [get_index(tab_name)]
             indices_to_delete.sort(reverse=True)
             for index_to_delete in indices_to_delete:
-                first_session.held_json["windows"][first_session.current_window_index]["tabs"].pop(index_to_delete-1)
+                first_session.held_json["windows"][current_window_index]["tabs"].pop(index_to_delete-1)
             print(len(indices_to_delete))
             first_session = sessionInfo(first_session.held_json)
             if use_urls:
@@ -338,19 +334,19 @@ while True:                 # Event Loop
             #modify the search function if this becomes too slow
             count = 0
             for url in matched_urls:
-                url_index = first_session.window_tabs_urls[first_session.current_window].index(url)
+                url_index = first_session.window_tabs_urls[current_window].index(url)
                 if url_index < indices_to_delete[-1]:
                     count += 1
                     
-            if values['In Search'] != '' and first_session.current_window != None:
-                for url in first_session.window_tabs_urls[first_session.current_window]:
+            if values['In Search'] != '' and current_window != None:
+                for url in first_session.window_tabs_urls[current_window]:
                     if values['In Search'] in url:
                         matched_urls += [url]
-                        url_index = first_session.window_tabs_urls[first_session.current_window].index(url)
-                        matched_titles += [first_session.window_tabs[first_session.current_window][url_index]]
+                        url_index = first_session.window_tabs_urls[current_window].index(url)
+                        matched_titles += [first_session.window_tabs[current_window][url_index]]
                         if url_index < indices_to_delete[-1]:
                             count += 1
-            print(len(first_session.window_tabs[first_session.current_window]))
+            print(len(first_session.window_tabs[current_window]))
             if (use_urls):
                 window.Element('_SEARCH').Update(values=matched_urls, set_to_index=count)
             else:
@@ -361,13 +357,13 @@ while True:                 # Event Loop
     elif event == 'Hide/Show URL':
         if (use_urls):
             use_urls = False
-            window.Element('_TAB').Update(values=get_listbox_values(first_session.window_tabs, values['_WIN']), set_to_index=first_session.current_tab_index)
-            equiv_title = first_session.window_tabs[first_session.current_window][first_session.current_tab_index]
+            window.Element('_TAB').Update(values=get_listbox_values(first_session.window_tabs, values['_WIN']), set_to_index=current_tab_index)
+            equiv_title = first_session.window_tabs[current_window][current_tab_index]
             window.Element('_HIS').Update(values=first_session.tabs_history[equiv_title])
         else:
             use_urls = True
-            window.Element('_TAB').Update(values=get_listbox_values(first_session.window_tabs_urls, values['_WIN']), set_to_index=first_session.current_tab_index)
-            equiv_url = first_session.window_tabs_urls[first_session.current_window][first_session.current_tab_index]
+            window.Element('_TAB').Update(values=get_listbox_values(first_session.window_tabs_urls, values['_WIN']), set_to_index=current_tab_index)
+            equiv_url = first_session.window_tabs_urls[current_window][current_tab_index]
             window.Element('_HIS').Update(values=first_session.tabs_history_urls[equiv_url])
 
     elif event == 'Overwrite':
