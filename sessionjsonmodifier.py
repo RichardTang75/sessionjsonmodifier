@@ -275,7 +275,7 @@ while True:
         if (first_session.current_window != None):
             indices_to_delete = []
             for to_delete in values['_WIN']:
-                indices_to_delete += [get_index(to_delete)]
+                indices_to_delete += [first_session.m_session.window_listbox.index(to_delete)]
             indices_to_delete.sort(reverse=True)
             for index_to_delete in indices_to_delete:
                 first_session.m_session.held_json["windows"].pop(index_to_delete)
