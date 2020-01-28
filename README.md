@@ -3,16 +3,12 @@ View and modify session jsons
 
 ![preview](sessionjson.PNG)
 
-In progress, currently allows for 
-* searching of tabs to delete
-* deleting windows 
-* deleting tabs
-* adding windows from one session to another
+NB: Uses the overwrite button to save
 
-Can switch from title to URL. Avoid doing this as it's a bit buggy. Click on selected window/tab/history or search button again before modifying for best results. 
+There are two ways of getting firefox to accept your modified session:
+1.) Save your modified session somewhere, force quit firefox from task manager/activity monitor/etc., switch out the recovery.jsonlz4 (in your mozilla roaming profiles sessionstore-backups folder, then restart firefox.
+2.) Exit firefox normally, look for a sessionstore.jsonlz4 in your mozilla roaming profiles folder, then edit and overwrite that file
 
-Works best when started while firefox is running and there is a current recovery.jsonlz4. Save changes somewhere, force quit firefox from task manager/activity monitor/etc., switch out the recovery.jsonlz4, restart, load the session. Causes firefox switch to tab to be buggy.
-
-Unlikely to be expanded upon, it already hits all of my needs. Might find out how a quit from Firefox menu might work instead of a force quit.
+Currently allows you to view recently closed tabs in a window but does not allow any alterations to the recently closed tabs. Also does nothing for tab histories.
 
 Uses lz4, PySimpleGUIQt with PySide2, and appdirs for finding the folder where all the mozilla profile information is kept.
